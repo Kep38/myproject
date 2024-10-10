@@ -3,7 +3,7 @@ from flask import Flask
 
 # Инициализация Sentry
 sentry_sdk.init(
-    dsn="https://e69b420afb64490f4222cf8a3b0dfca9@o4508099311108096.ingest.de.sentry.io/4508099331358800",
+    dsn=********
     traces_sample_rate=1.0,
     profiles_sample_rate=1.0,
 )

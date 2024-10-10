@@ -5,7 +5,7 @@ from sentry_sdk.integrations.flask import FlaskIntegration
 
 # Инициализация Sentry
 sentry_sdk.init(
-    dsn="ВАШ_DSN_КЛЮЧ_ЗДЕСЬ",  # Замените на ваш DSN-ключ Sentry
+    dsn=********  # Замените на ваш DSN-ключ Sentry
     integrations=[FlaskIntegration()]
 )
 
