@@ -310,3 +310,55 @@ jobs:
           LOG_SERVER: ${{ secrets.LOG_SERVER }}
           LOG_PORT: ${{ secrets.LOG_PORT }}
           CIDR_BLOCK: ${{ secrets.CIDR_BLOCK }}
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v1
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
+        env:
+          YC_TOKEN: ${{ secrets.YC_TOKEN }}
+          YC_CLOUD_ID: ${{ secrets.YC_CLOUD_ID }}
+          YC_FOLDER_ID: ${{ secrets.YC_FOLDER_ID }}
+          EXISTING_VPC_NETWORK_ID: ${{ secrets.EXISTING_VPC_NETWORK_ID }}
+          VPC_SUBNET_ID: ${{ secrets.VPC_SUBNET_ID }}
+          ZONE: ${{ secrets.ZONE }}
+          DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
+          DATABASE_USER: ${{ secrets.DATABASE_USER }}
+          DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+          NODE_COUNT: ${{ secrets.NODE_COUNT }}
+          NODE_DISK_SIZE: ${{ secrets.NODE_DISK_SIZE }}
+          NODE_MEMORY: ${{ secrets.NODE_MEMORY }}
+          NODE_CORES: ${{ secrets.NODE_CORES }}
+          MASTER_VERSION: ${{ secrets.MASTER_VERSION }}
+          SERVICE_ACCOUNT_ID: ${{ secrets.SERVICE_ACCOUNT_ID }}
+          NODE_SERVICE_ACCOUNT_ID: ${{ secrets.NODE_SERVICE_ACCOUNT_ID }}
+          GRAFANA_ADMIN_PASSWORD: ${{ secrets.GRAFANA_ADMIN_PASSWORD }}
+          SMTP_SERVER: ${{ secrets.SMTP_SERVER }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          ALERTMANAGER_EMAIL: ${{ secrets.ALERTMANAGER_EMAIL }}
+          APP_IMAGE: ${{ secrets.APP_IMAGE }}
+          KUBERNETES_HOST: ${{ secrets.KUBERNETES_HOST }}
+          KUBERNETES_TOKEN: ${{ secrets.KUBERNETES_TOKEN }}
+          KUBERNETES_CA_CERTIFICATE: ${{ secrets.KUBERNETES_CA_CERTIFICATE }}
+          LOG_SERVER: ${{ secrets.LOG_SERVER }}
+          LOG_PORT: ${{ secrets.LOG_PORT }}
+          CIDR_BLOCK: ${{ secrets.CIDR_BLOCK }}
