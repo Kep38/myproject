@@ -1,3 +1,45 @@
+#!/bin/bash
+
+# Проверка наличия необходимых утилит
+command -v git >/dev/null 2>&1 || { echo >&2 "Требуется git, но он не установлен. Установите git и попробуйте снова."; exit 1; }
+command -v curl >/dev/null 2>&1 || { echo >&2 "Требуется curl, но он не установлен. Установите curl и попробуйте снова."; exit 1; }
+
+# Переменные окружения
+GITHUB_USER="${GITHUB_USER:-Kep38}"
+GITHUB_TOKEN="${GITHUB_TOKEN:-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}"
+LOCAL_PROJECT_PATH="${LOCAL_PROJECT_PATH:-/path/to/local/project}"
+REPO="${REPO:-myproject}"
+BRANCH_NAME="${BRANCH_NAME:-new-feature-branch}"
+GITHUB_URL="https://github.com/$GITHUB_USER/$REPO.git"
+
+# Функция для обработки ошибок
+error_exit() {
+    echo "$1" >&2
+    exit 1
+}
+
+# Создание нового репозитория
+echo "Создание нового репозитория $REPO..."
+curl -H "Authorization: token $GITHUB_TOKEN" https://api.github.com/user/repos -d '{"name":"'$REPO'"}' || error_exit "Ошибка создания репозитория."
+
+# Клонирование репозитория
+echo "Клонирование репозитория $REPO..."
+git clone $GITHUB_URL || error_exit "Ошибка клонирования репозитория."
+cd $REPO || error_exit "Ошибка перехода в директорию репозитория."
+
+# Создание новой ветки
+echo "Создание новой ветки $BRANCH_NAME..."
+git checkout -b $BRANCH_NAME || error_exit "Ошибка создания новой ветки."
+
+# Копирование файлов проекта
+echo "Копирование файлов проекта..."
+cp -r $LOCAL_PROJECT_PATH/* . || error_exit "Ошибка копирования файлов проекта."
+
+# Создание директории для workflow
+mkdir -p .github/workflows || error_exit "Ошибка создания директории для workflow."
+
+# Создание файла workflow
+cat <<EOL > .github/workflows/deployment.yaml
 name: Deployment
 
 on:
@@ -26,3 +68,16 @@ jobs:
     - name: Deploy application
       run: |
         python app/app.py
+EOL
+
+# Проверка наличия workflow
+if [ ! -f ".github/workflows/deployment.yaml" ]; then
+    error_exit "Ошибка создания workflow."
+fi
+
+# Коммит и пуш изменений
+git add .
+git commit -m "Добавление нового проекта, скрипта для деплоя и workflow" || error_exit "Ошибка коммита изменений."
+git push origin $BRANCH_NAME || error_exit "Ошибка пуша в ветку $BRANCH_NAME."
+
+echo "Изменения запушены в ветку $BRANCH_NAME репозитория."
