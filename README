@@ -1,0 +1,176 @@
+Этот репозиторий содержит инфраструктуру и приложение для регистрации землетрясений, развернутое в Yandex Cloud с использованием практик CI/CD.
+
+Инструменты:
+
+Terraform: Для описания и развертывания инфраструктуры.
+Yandex Cloud: Облачная платформа, на которой развернуто приложение.
+Yandex Compute Cloud: Для виртуальных машин.
+Yandex Managed Service for Kubernetes: Для оркестрации контейнеров.
+Yandex Managed Service for PostgreSQL: Для базы данных.
+Yandex Virtual Private Cloud: Для сети.
+Yandex Lockbox: Для хранения секретов.
+Yandex Cloud Functions: Для создания токена
+Docker: Для контейнеризации приложения.
+Helm: Для управления приложением в Kubernetes.
+Prometheus: Для мониторинга метрик.
+Grafana: Для визуализации метрик и создания дашбордов.
+Alertmanager: Для оповещений на основе метрик.
+yq: утилита командной строки для работы с YAML
+jq: утилита командной строки для работы с JSON
+
+Регистратор землетрясений: Простое приложение, которое записывает события (землетрясения) в базу данных PostgreSQL.
+Docker образ: remi7777/remi:latest
+Переменные окружения:
+DATABASE_URL: Строка подключения к базе данных PostgreSQL.
+Структура репозитория:
+
+earthquake-app/: Исходный код приложения.
+app/:
+app.py: Основной код приложения.
+templates/: Шаблоны HTML.
+Dockerfile: Инструкции для сборки Docker образа.
+requirements.txt: Зависимости Python.
+modules/: Модули Terraform.
+app/: Развертывание приложения в Kubernetes.
+db/: Создание кластера PostgreSQL.
+k8s/: Создание кластера Kubernetes.
+logging/: Настройка системы логирования.
+monitoring/: Настройка мониторинга (Prometheus, Grafana, Alertmanager).
+vpc/: Создание VPC и подсети.
+prod/: Конфигурация Terraform для production окружения.
+scripts/: Скрипты для развертывания.
+deploy_stage1.sh: Развертывание кластера k8s.
+deploy_stage2.sh: Развертывание БД, мониторинга, приложения и логгирования.
+stages/: Примеры конфигураций для разных стадий развертывания.
+stage1/: Развертывание кластера k8s.
+stage2/: Развертывание БД, мониторинга, приложения и логгирования.
+Развертывание:
+
+Предварительные требования:
+
+Учетная запись Yandex Cloud: Должна быть учетная запись в Yandex Cloud и создан платежный аккаунт.
+Установленный Yandex Cloud CLI
+Установленный Terraform
+Установленный Docker
+Установленный kubectl.
+Установленный Helm
+Установленный jq: sudo apt-get install jq (Ubuntu)
+Установленный yq: sudo snap install yq (Ubuntu)
+Настроенный Yandex Cloud CLI:  yc config profile create <profile_name> 
+
+
+Создан сервисный аккаунт.
+
+Назначены ему роли
+
+Установлены переменные окружения:
+
+Bash
+
+export YC_SERVICE_ACCOUNT_KEY_FILE=key.json
+export YC_CLOUD_ID=$(yc config get cloud-id)
+export YC_FOLDER_ID=$(yc config get folder-id)
+  
+
+Этапы развертывания:
+
+Подготовка 
+
+Склонирован репозиторий:
+
+Bash
+
+git clone <repository_url>
+cd <repository_directory>
+Создан секрет в Yandex Lockbox:
+
+Bash
+
+yc lockbox secret create --name terraform-secrets --description "Terraform secrets" --folder-id $(yc config get folder-id)
+
+Bash
+
+yc lockbox secret version add \
+  --id <secret_id> \ 
+  --payload '[
+    {"key": "database_password", "text_value": "<password>"},
+    {"key": "cloud_id", "text_value": "'"$YC_CLOUD_ID"'"},
+    {"key": "folder_id", "text_value": "'"$YC_FOLDER_ID"'"},
+    {"key": "service_account_id", "text_value": "<service_account_id>"},
+    {"key": "node_service_account_id", "text_value": "<service_account_id>"},
+    {"key": "grafana_admin_password", "text_value": "<grafana_password>"},
+    {"key": "smtp_user", "text_value": "<smtp_user>"},
+    {"key": "smtp_password", "text_value": "<smtp_password>"},
+    {"key": "alertmanager_email", "text_value": "<email>"}
+]'
+Замена
+
+<secret_id> - на ID созданного секрета
+<password> - на пароль для базы данных.
+<grafana_password> - на пароль для Grafana.
+<smtp_user> - на логин SMTP.
+<smtp_password> - на пароль SMTP.
+<email> - на email для Alertmanager.
+<service_account_id> - на ID сервисного аккаунта.
+Развертывание:
+
+Скрипт deploy_stage1.sh:
+
+Bash
+
+#!/bin/bash
+
+set -e
+
+# Переходим в директорию stage1
+cd /home/remi/project/terraform2/terraform/stages/stage1
+
+# Инициализируем Terraform
+terraform init
+
+# Применяем конфигурацию
+terraform apply -auto-approve
+Скрипт deploy_stage2.sh:
+
+Bash
+
+#!/bin/bash
+
+set -e
+
+# Переходим в директорию prod
+cd /home/remi/project/terraform2/terraform/prod
+
+# Инициализируем Terraform
+terraform init
+
+# Применяем конфигурацию
+terraform apply -auto-approve
+
+
+Bash
+
+./scripts/deploy_stage1.sh
+Остальные компоненты (Развернут кластер VPC и Kubernetes):
+
+Bash
+
+./scripts/deploy_stage2.sh
+Доступ к приложению и мониторингу:
+
+Grafana: URL и пароль для доступа к Grafana будут выведены в консоль после применения конфигурации Terraform.
+Prometheus: URL для доступа к Prometheus будет выведен в консоль.
+Приложение: После развертывания приложения вы  доступ к нему через LoadBalancer, созданный Kubernetes. IP-адрес LoadBalancer-а можно узнать с помощью команды kubectl get service -n earthquake-app earthquake-app.
+Секреты:
+
+Секреты хранятся в Yandex Lockbox.
+Terraform получает доступ к секретам через data.yandex_lockbox_secret_version.
+Секреты не хранятся в коде Terraform и не попадают в систему контроля версий.
+
+
+Alertmanager настроен на отправку уведомлений на email, указанный в переменной alertmanager_email.
+Настройки SMTP-сервера (адрес, пользователь, пароль) берутся из переменных, которые передаются в модуль monitoring.
+Правила оповещений (алерты) задаются в файле prometheus_rules.yaml модуля monitoring.
+
+
+

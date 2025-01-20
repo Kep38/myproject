@@ -1,0 +1,11 @@
+# database_password       = data.yandex_lockbox_secret_version.terraform_secrets.entries["database_password"]
+# cloud_id               = data.yandex_lockbox_secret_version.terraform_secrets.entries["cloud_id"]
+# folder_id              = data.yandex_lockbox_secret_version.terraform_secrets.entries["folder_id"]
+# token                  = data.yandex_lockbox_secret_version.terraform_secrets.entries["token"]
+# service_account_id      = data.yandex_lockbox_secret_version.terraform_secrets.entries["service_account_id"]
+# node_service_account_id = data.yandex_lockbox_secret_version.terraform_secrets.entries["node_service_account_id"]
+# grafana_admin_password  = data.yandex_lockbox_secret_version.terraform_secrets.entries["grafana_admin_password"]
+# smtp_user               = data.yandex_lockbox_secret_version.terraform_secrets.entries["smtp_user"]
+# smtp_password           = data.yandex_lockbox_secret_version.terraform_secrets.entries["smtp_password"]
+# alertmanager_email      = data.yandex_lockbox_secret_version.terraform_secrets.entries["alertmanager_email"]
+

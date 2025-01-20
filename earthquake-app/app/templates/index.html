@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recent Earthquakes</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #333;
+            color: white;
+            padding: 10px;
+            text-align: center;
+        }
+        table {
+            width: 80%;
+            margin: 20px auto;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 8px 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #333;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        .timestamp {
+            color: #888;
+        }
+    </style>
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const socket = io();
+
+            socket.on('new_earthquake', function(data) {
+                const tableBody = document.querySelector('table tbody');
+                const newRow = document.createElement('tr');
+
+                const locationCell = document.createElement('td');
+                locationCell.textContent = data.location;
+                newRow.appendChild(locationCell);
+
+                const magnitudeCell = document.createElement('td');
+                magnitudeCell.textContent = data.magnitude;
+                newRow.appendChild(magnitudeCell);
+
+                const timeCell = document.createElement('td');
+                timeCell.textContent = data.time;
+                timeCell.classList.add('timestamp');
+                newRow.appendChild(timeCell);
+
+                tableBody.insertBefore(newRow, tableBody.firstChild);
+            });
+        });
+    </script>
+</head>
+<body>
+
+<header>
+    <h1>Recent Earthquakes</h1>
+</header>
+
+<table>
+    <thead>
+        <tr>
+            <th>Location</th>
+            <th>Magnitude</th>
+            <th>Time</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for eq in earthquakes %}
+        <tr>
+            <td>{{ eq.location }}</td>
+            <td>{{ eq.magnitude }}</td>
+            <td class="timestamp">{{ eq.time }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+</body>
+</html>

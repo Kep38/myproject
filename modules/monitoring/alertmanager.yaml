@@ -1,0 +1,14 @@
+global:
+  smtp_smarthost: 'smtp.mail.ru:587'
+  smtp_from: '4b7nk9cf5'
+  smtp_auth_username: '4b7nk9cf5'
+  smtp_auth_password: '16b2172c0ikAHhyBeLQA'
+
+route:
+  group_by: ['alertname']
+  receiver: 'email-alert'
+
+receivers:
+  - name: 'email-alert'
+    email_configs:
+      - to: '4b7nk9cf5'

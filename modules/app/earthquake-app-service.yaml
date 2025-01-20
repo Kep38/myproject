@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: earthquake-app
+  namespace: earthquake-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: earthquake-app
+  template:
+    metadata:
+      labels:
+        app: earthquake-app
+    spec:
+      containers:
+        - name: earthquake-app
+          image: remi7777/remi
+          ports:
+            - containerPort: 8080
+          env:
+            - name: DATABASE_URL
+              value: "${db_url}"

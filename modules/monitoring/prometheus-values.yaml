@@ -1,0 +1,42 @@
+alertmanager:
+  config:
+    global:
+      smtp_smarthost: '{var.smtp_server}'
+      smtp_from: '{var.smtp_user}'
+      smtp_auth_username: '{var.smtp_user}'
+      smtp_auth_password: '{var.smtp_password}'
+    route:
+      group_by: ['alertname']
+      receiver: 'email-alert'
+    receivers:
+      - name: 'email-alert'
+        email_configs:
+          - to: '{var.alertmanager_email}'
+  enabled: true
+
+server:
+  global:
+    scrape_interval: ${var.prometheus_scrape_interval}
+
+prometheus:
+  prometheusSpec:
+    serviceMonitorSelectorNilUsesHelmValues: false
+    podMonitorSelectorNilUsesHelmValues: false
+    additionalPrometheusRulesMap:
+      default.rules: |
+        # Содержимое prometheus_rules.yaml
+        # Пример правила:
+        groups:
+        - name: example
+          rules:
+          - alert: HighErrorRate
+            expr: sum(rate(http_requests_total{status="500"}[5m])) / sum(rate(http_requests_total[5m])) > 0.1
+            for: 1m
+            labels:
+              severity: critical
+            annotations:
+              summary: "High error rate on {{ $labels.instance }}"
+              description: "{{ $labels.instance }} has a high error rate ({{ $value }})."
+
+grafana:
+  enabled: false
